@@ -3,10 +3,12 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import { Navigation } from './Navigation';
 import logoImage from '../assets/f9f3557d671d8125a616ddcb69e2a0d761511cdc.png';
 
-export function Login() {
+export function Signup() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const { scrollY } = useScroll();
   
   const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
@@ -17,7 +19,11 @@ export function Login() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login submitted:', { email, password });
+    if (password !== confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+    console.log('Signup submitted:', { name, email, password });
   };
 
   return (
@@ -84,7 +90,7 @@ export function Login() {
         <div style={{ position: 'relative', zIndex: 10, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <Navigation isLoaded={isLoaded} />
           
-          {/* Login Form Container */}
+          {/* Signup Form Container */}
           <div style={{ 
             flex: 1, 
             display: 'flex', 
@@ -98,7 +104,7 @@ export function Login() {
               transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
               style={{ width: '100%', maxWidth: '450px' }}
             >
-              {/* Login Card */}
+              {/* Signup Card */}
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)',
@@ -136,7 +142,7 @@ export function Login() {
                     letterSpacing: '0.1em'
                   }}
                 >
-                  Welcome Back
+                  Join Us
                 </motion.h1>
 
                 <motion.p
@@ -149,16 +155,58 @@ export function Login() {
                     marginBottom: '32px'
                   }}
                 >
-                  Sign in to your account
+                  Create your account
                 </motion.p>
 
-                {/* Login Form */}
+                {/* Signup Form */}
                 <motion.form
                   onSubmit={handleSubmit}
                   initial={{ opacity: 0 }}
                   animate={isLoaded ? { opacity: 1 } : { opacity: 0 }}
                   transition={{ duration: 0.5, delay: 0.5 }}
                 >
+                  {/* Name Field */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <label 
+                      htmlFor="name" 
+                      style={{
+                        display: 'block',
+                        color: 'white',
+                        marginBottom: '8px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      placeholder="Enter your full name"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '8px',
+                        color: 'white',
+                        fontSize: '16px',
+                        outline: 'none',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'rgb(251, 191, 36)';
+                        e.target.style.boxShadow = '0 0 0 1px rgb(251, 191, 36)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
+
                   {/* Email Field */}
                   <div style={{ marginBottom: '24px' }}>
                     <label 
@@ -220,7 +268,7 @@ export function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      placeholder="Enter your password"
+                      placeholder="Create a password"
                       style={{
                         width: '100%',
                         padding: '12px 16px',
@@ -243,44 +291,96 @@ export function Login() {
                     />
                   </div>
 
-                  {/* Remember Me & Forgot Password */}
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'space-between', 
-                    marginBottom: '24px' 
-                  }}>
+                  {/* Confirm Password Field */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <label 
+                      htmlFor="confirmPassword" 
+                      style={{
+                        display: 'block',
+                        color: 'white',
+                        marginBottom: '8px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      Confirm Password
+                    </label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      placeholder="Confirm your password"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '8px',
+                        color: 'white',
+                        fontSize: '16px',
+                        outline: 'none',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'rgb(251, 191, 36)';
+                        e.target.style.boxShadow = '0 0 0 1px rgb(251, 191, 36)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
+
+                  {/* Terms & Conditions */}
+                  <div style={{ marginBottom: '24px' }}>
                     <label style={{ 
                       display: 'flex', 
-                      alignItems: 'center', 
+                      alignItems: 'flex-start', 
                       color: 'rgba(255, 255, 255, 0.8)', 
                       fontSize: '14px',
                       cursor: 'pointer'
                     }}>
                       <input
                         type="checkbox"
+                        required
                         style={{ 
                           marginRight: '8px',
+                          marginTop: '2px',
                           width: '16px',
                           height: '16px',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          flexShrink: 0
                         }}
                       />
-                      Remember me
+                      <span>
+                        I agree to the{' '}
+                        <a 
+                          href="#terms" 
+                          style={{ 
+                            color: 'rgb(251, 191, 36)',
+                            textDecoration: 'none'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                          onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                        >
+                          Terms & Conditions
+                        </a>
+                        {' '}and{' '}
+                        <a 
+                          href="#privacy" 
+                          style={{ 
+                            color: 'rgb(251, 191, 36)',
+                            textDecoration: 'none'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                          onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                        >
+                          Privacy Policy
+                        </a>
+                      </span>
                     </label>
-                    <a 
-                      href="#forgot" 
-                      style={{ 
-                        color: 'rgb(251, 191, 36)', 
-                        fontSize: '14px',
-                        textDecoration: 'none',
-                        transition: 'color 0.3s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(252, 211, 77)'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(251, 191, 36)'}
-                    >
-                      Forgot Password?
-                    </a>
                   </div>
 
                   {/* Submit Button */}
@@ -308,7 +408,7 @@ export function Login() {
                       e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
                     }}
                   >
-                    Sign In
+                    Create Account
                   </motion.button>
 
                   {/* Divider */}
@@ -335,12 +435,12 @@ export function Login() {
                         backgroundColor: 'rgba(255, 255, 255, 0.05)', 
                         color: 'rgba(255, 255, 255, 0.7)' 
                       }}>
-                        Or continue with
+                        Or sign up with
                       </span>
                     </div>
                   </div>
 
-                  {/* Social Login Buttons */}
+                  {/* Social Signup Buttons */}
                   <div style={{ 
                     display: 'grid', 
                     gridTemplateColumns: 'repeat(2, 1fr)', 
@@ -410,15 +510,15 @@ export function Login() {
                     </motion.button>
                   </div>
 
-                  {/* Sign Up Link */}
+                  {/* Sign In Link */}
                   <p style={{ 
                     textAlign: 'center', 
                     color: 'rgba(255, 255, 255, 0.7)', 
                     fontSize: '14px' 
                   }}>
-                    Don't have an account?{' '}
+                    Already have an account?{' '}
                     <a 
-                      href="#signup" 
+                      href="#login" 
                       style={{ 
                         color: 'rgb(251, 191, 36)',
                         textDecoration: 'none',
@@ -428,7 +528,7 @@ export function Login() {
                       onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(252, 211, 77)'}
                       onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(251, 191, 36)'}
                     >
-                      Sign up
+                      Sign in
                     </a>
                   </p>
                 </motion.form>
