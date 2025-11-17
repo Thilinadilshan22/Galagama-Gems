@@ -4,9 +4,10 @@ import { Navigation } from './components/Navigation';
 import { HeroContent } from './components/HeroContent';
 import { Login } from './components/Login';
 import { CustomDesign } from './components/CustomDesign';
+import { AboutUs } from './components/AboutUs';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'custom-design'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'custom-design' | 'about'>('home');
   const [isLoaded, setIsLoaded] = useState(false);
   const { scrollY } = useScroll();
   
@@ -25,6 +26,8 @@ export default function App() {
         setCurrentPage('login');
       } else if (hash === 'custom-design') {
         setCurrentPage('custom-design');
+      } else if (hash === 'about') {
+        setCurrentPage('about');
       } else {
         setCurrentPage('home');
       }
@@ -41,6 +44,10 @@ export default function App() {
 
   if (currentPage === 'custom-design') {
     return <CustomDesign />;
+  }
+
+  if (currentPage === 'about') {
+    return <AboutUs />;
   }
 
   return (
