@@ -14,7 +14,18 @@ export function CustomDesign() {
   const [estimatedPrice, setEstimatedPrice] = useState(0);
   const [isDrawing, setIsDrawing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const backgroundCanvasRef = useRef<HTMLCanvasElement>(null); // For drawings
   const [uploadedDesign, setUploadedDesign] = useState<string | null>(null);
+  const [designMode, setDesignMode] = useState<'draw' | 'shapes' | 'upload' | null>(null);
+  const [selectedShape, setSelectedShape] = useState<string | null>(null);
+  const [drawnShapes, setDrawnShapes] = useState<any[]>([]);
+  const [isCanvasDrawing, setIsCanvasDrawing] = useState(false);
+  const [drawMode, setDrawMode] = useState<'pen' | 'eraser' | 'line'>('pen');
+  const [selectedShapeIndex, setSelectedShapeIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [lineStart, setLineStart] = useState<{x: number, y: number} | null>(null);
+  const [dragOffset, setDragOffset] = useState<{x: number, y: number}>({ x: 0, y: 0 });
   
   const { scrollY } = useScroll();
   const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
@@ -190,65 +201,449 @@ export function CustomDesign() {
 
   const sizes = ['XS', 'S', 'M', 'L', 'XL'];
 
-  // Canvas drawing setup
+  // Canvas drawing setup with eraser and line tool - draws on background layer
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const canvas = backgroundCanvasRef.current;
+    if (!canvas || !isCanvasDrawing) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    // Set canvas background
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     let drawing = false;
     let lastX = 0;
     let lastY = 0;
 
-    const startDrawing = (e: MouseEvent) => {
-      drawing = true;
-      [lastX, lastY] = [e.offsetX, e.offsetY];
+    const startDrawing = (e: MouseEvent | TouchEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      const x = (clientX - rect.left) * (canvas.width / rect.width);
+      const y = (clientY - rect.top) * (canvas.height / rect.height);
+
+      if (drawMode === 'line') {
+        if (!lineStart) {
+          setLineStart({ x, y });
+        } else {
+          // Draw line from lineStart to current position
+          ctx.strokeStyle = '#FBB040';
+          ctx.lineWidth = 4;
+          ctx.lineCap = 'round';
+          ctx.shadowBlur = 2;
+          ctx.shadowColor = '#FBB040';
+          ctx.beginPath();
+          ctx.moveTo(lineStart.x, lineStart.y);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          setLineStart(null);
+        }
+      } else {
+        drawing = true;
+        lastX = x;
+        lastY = y;
+      }
     };
 
-    const draw = (e: MouseEvent) => {
-      if (!drawing) return;
-      ctx.strokeStyle = '#FBB040';
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+    const draw = (e: MouseEvent | TouchEvent) => {
+      if (!drawing || drawMode === 'line') return;
+      e.preventDefault();
+      
+      const rect = canvas.getBoundingClientRect();
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      const currentX = (clientX - rect.left) * (canvas.width / rect.width);
+      const currentY = (clientY - rect.top) * (canvas.height / rect.height);
+
+      if (drawMode === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineWidth = 20;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+      } else {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = '#FBB040';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowBlur = 2;
+        ctx.shadowColor = '#FBB040';
+      }
 
       ctx.beginPath();
       ctx.moveTo(lastX, lastY);
-      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.lineTo(currentX, currentY);
       ctx.stroke();
-      [lastX, lastY] = [e.offsetX, e.offsetY];
+      
+      lastX = currentX;
+      lastY = currentY;
     };
 
     const stopDrawing = () => {
       drawing = false;
+      ctx.globalCompositeOperation = 'source-over';
     };
 
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseout', stopDrawing);
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
 
     return () => {
       canvas.removeEventListener('mousedown', startDrawing);
       canvas.removeEventListener('mousemove', draw);
       canvas.removeEventListener('mouseup', stopDrawing);
       canvas.removeEventListener('mouseout', stopDrawing);
+      canvas.removeEventListener('touchstart', startDrawing);
+      canvas.removeEventListener('touchmove', draw);
+      canvas.removeEventListener('touchend', stopDrawing);
     };
-  }, []);
+  }, [isCanvasDrawing, drawMode, lineStart]);
+
+  // Separate effect for shapes mode interaction with improved dragging
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || designMode !== 'shapes') return;
+
+    let dragging = false;
+    let resizing = false;
+    let dragIndex: number | null = null;
+    let offsetX = 0;
+    let offsetY = 0;
+    let initialSize = 0;
+    let resizeStartDist = 0;
+
+    const getDistance = (x1: number, y1: number, x2: number, y2: number) => {
+      return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    };
+
+    const isNearEdge = (mouseX: number, mouseY: number, shapeX: number, shapeY: number, size: number) => {
+      const distance = getDistance(mouseX, mouseY, shapeX, shapeY);
+      return Math.abs(distance - size / 2) < 20; // Increased threshold to 20px for easier interaction
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+      // Check if clicked on any shape (from top to bottom)
+      for (let i = drawnShapes.length - 1; i >= 0; i--) {
+        const { x, y, size = 80 } = drawnShapes[i];
+        const distance = getDistance(clickX, clickY, x, y);
+        
+        // Check if near edge (for resizing) - more lenient threshold
+        if (isNearEdge(clickX, clickY, x, y, size)) {
+          setSelectedShapeIndex(i);
+          resizing = true;
+          setIsResizing(true);
+          dragIndex = i;
+          initialSize = size;
+          resizeStartDist = distance;
+          e.preventDefault();
+          return;
+        }
+        
+        // Check if inside shape (for moving)
+        if (distance < size / 2) {
+          setSelectedShapeIndex(i);
+          dragging = true;
+          setIsDragging(true);
+          dragIndex = i;
+          // Store offset from shape center for smooth dragging
+          offsetX = clickX - x;
+          offsetY = clickY - y;
+          e.preventDefault();
+          return;
+        }
+      }
+      
+      setSelectedShapeIndex(null);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+      // Change cursor when hovering near edge
+      if (!dragging && !resizing && selectedShapeIndex !== null) {
+        const { x, y, size = 80 } = drawnShapes[selectedShapeIndex];
+        if (isNearEdge(mouseX, mouseY, x, y, size)) {
+          canvas.style.cursor = 'nwse-resize';
+        } else if (getDistance(mouseX, mouseY, x, y) < size / 2) {
+          canvas.style.cursor = 'move';
+        } else {
+          canvas.style.cursor = 'default';
+        }
+      }
+
+      if (resizing && dragIndex !== null) {
+        e.preventDefault();
+        const { x, y } = drawnShapes[dragIndex];
+        const currentDist = getDistance(mouseX, mouseY, x, y);
+        const sizeDelta = (currentDist - resizeStartDist) * 2;
+        const newSize = Math.max(30, Math.min(300, initialSize + sizeDelta));
+
+        setDrawnShapes(prev => {
+          const updated = [...prev];
+          updated[dragIndex] = {
+            ...updated[dragIndex],
+            size: newSize
+          };
+          return updated;
+        });
+      } else if (dragging && dragIndex !== null) {
+        e.preventDefault();
+        // Use offset for smooth dragging without jumps
+        const newX = mouseX - offsetX;
+        const newY = mouseY - offsetY;
+
+        setDrawnShapes(prev => {
+          const updated = [...prev];
+          updated[dragIndex] = {
+            ...updated[dragIndex],
+            x: newX,
+            y: newY
+          };
+          return updated;
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      dragging = false;
+      resizing = false;
+      dragIndex = null;
+      setIsDragging(false);
+      setIsResizing(false);
+      if (selectedShapeIndex !== null) {
+        canvas.style.cursor = 'move';
+      } else {
+        canvas.style.cursor = 'default';
+      }
+    };
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseup', handleMouseUp);
+    canvas.addEventListener('mouseleave', handleMouseUp);
+
+    return () => {
+      canvas.removeEventListener('mousedown', handleMouseDown);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseup', handleMouseUp);
+      canvas.removeEventListener('mouseleave', handleMouseUp);
+    };
+  }, [designMode, drawnShapes, selectedShapeIndex]);
 
   const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    const bgCanvas = backgroundCanvasRef.current;
+    
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    
+    if (bgCanvas) {
+      const bgCtx = bgCanvas.getContext('2d');
+      if (bgCtx) {
+        bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      }
+    }
+    
+    setDrawnShapes([]);
+    setSelectedShapeIndex(null);
+    setLineStart(null);
+  };
+
+  const saveDesign = () => {
+    const canvas = canvasRef.current;
+    const bgCanvas = backgroundCanvasRef.current;
+    
+    if (!canvas || !bgCanvas) return;
+    
+    // Create a temporary canvas to merge both layers
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempCtx = tempCanvas.getContext('2d');
+    
+    if (!tempCtx) return;
+    
+    // Draw background (drawings) first
+    tempCtx.drawImage(bgCanvas, 0, 0);
+    // Then draw shapes on top
+    tempCtx.drawImage(canvas, 0, 0);
+    
+    // Convert to image and download
+    tempCanvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = `jewelry-design-${Date.now()}.png`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  };
+
+  const redrawCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawnShapes.forEach((shapeData, index) => {
+      const { shape, x, y, size = 80 } = shapeData;
+      
+      ctx.fillStyle = selectedShapeIndex === index 
+        ? 'rgba(251, 191, 36, 0.5)' 
+        : 'rgba(251, 191, 36, 0.3)';
+      ctx.strokeStyle = selectedShapeIndex === index ? '#FFD700' : '#FBB040';
+      ctx.lineWidth = selectedShapeIndex === index ? 4 : 3;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#FBB040';
+
+      switch(shape) {
+        case 'circle':
+          ctx.beginPath();
+          ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          break;
+        case 'square':
+          ctx.fillRect(x - size / 2, y - size / 2, size, size);
+          ctx.strokeRect(x - size / 2, y - size / 2, size, size);
+          break;
+        case 'triangle':
+          ctx.beginPath();
+          ctx.moveTo(x, y - size / 2);
+          ctx.lineTo(x - size / 2, y + size / 2);
+          ctx.lineTo(x + size / 2, y + size / 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          break;
+        case 'diamond':
+          ctx.beginPath();
+          ctx.moveTo(x, y - size / 2);
+          ctx.lineTo(x + size / 2, y);
+          ctx.lineTo(x, y + size / 2);
+          ctx.lineTo(x - size / 2, y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          break;
+        case 'star':
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+            const sx = x + Math.cos(angle) * size / 2;
+            const sy = y + Math.sin(angle) * size / 2;
+            if (i === 0) ctx.moveTo(sx, sy);
+            else ctx.lineTo(sx, sy);
+            
+            const innerAngle = angle + Math.PI / 5;
+            const innerX = x + Math.cos(innerAngle) * size / 4;
+            const innerY = y + Math.sin(innerAngle) * size / 4;
+            ctx.lineTo(innerX, innerY);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          break;
+        case 'heart':
+          ctx.beginPath();
+          const topCurveHeight = size * 0.3;
+          ctx.moveTo(x, y + size / 4);
+          ctx.bezierCurveTo(x, y, x - size / 2, y - topCurveHeight, x - size / 2, y + size / 8);
+          ctx.bezierCurveTo(x - size / 2, y + size / 4, x, y + size / 2, x, y + size / 2);
+          ctx.bezierCurveTo(x, y + size / 2, x + size / 2, y + size / 4, x + size / 2, y + size / 8);
+          ctx.bezierCurveTo(x + size / 2, y - topCurveHeight, x, y, x, y + size / 4);
+          ctx.fill();
+          ctx.stroke();
+          break;
+        case 'oval':
+          ctx.beginPath();
+          ctx.ellipse(x, y, size / 2, size / 3, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          break;
+        case 'hexagon':
+          ctx.beginPath();
+          for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI * 2 * i) / 6;
+            const hx = x + Math.cos(angle) * size / 2;
+            const hy = y + Math.sin(angle) * size / 2;
+            if (i === 0) ctx.moveTo(hx, hy);
+            else ctx.lineTo(hx, hy);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          break;
+        case 'flower':
+          ctx.beginPath();
+          for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI * 2 * i) / 8;
+            const petalX = x + Math.cos(angle) * size / 3;
+            const petalY = y + Math.sin(angle) * size / 3;
+            ctx.moveTo(x, y);
+            ctx.arc(petalX, petalY, size / 6, 0, Math.PI * 2);
+          }
+          ctx.fill();
+          ctx.stroke();
+          // Center circle
+          ctx.beginPath();
+          ctx.arc(x, y, size / 8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          break;
+        case 'moon':
+          ctx.beginPath();
+          ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          // Cut out for crescent
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.beginPath();
+          ctx.arc(x + size / 4, y - size / 8, size / 2.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalCompositeOperation = 'source-over';
+          break;
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (designMode === 'shapes') {
+      redrawCanvas();
+    }
+  }, [drawnShapes, selectedShapeIndex, designMode]);
+
+  const addShapeToCanvas = (shape: string) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const size = 80;
+    
+    setDrawnShapes([...drawnShapes, { shape, x: centerX, y: centerY, size }]);
+  };
+
+  const deleteSelectedShape = () => {
+    if (selectedShapeIndex === null) return;
+    const updatedShapes = drawnShapes.filter((_, index) => index !== selectedShapeIndex);
+    setDrawnShapes(updatedShapes);
+    setSelectedShapeIndex(null);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -274,10 +669,10 @@ export function CustomDesign() {
     }
     
     if (engravingText) price += 80;
-    if (uploadedDesign || isDrawing) price += 150; // Custom design fee
+    if (uploadedDesign || designMode) price += 150; // Custom design fee
     
     setEstimatedPrice(price);
-  }, [selectedMetal, selectedGemType, selectedGemstone, engravingText, uploadedDesign, isDrawing]);
+  }, [selectedMetal, selectedGemType, selectedGemstone, engravingText, uploadedDesign, designMode]);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -932,170 +1327,519 @@ export function CustomDesign() {
                           borderRadius: '12px',
                           padding: '24px',
                         }}>
-                          {/* Tab Selection */}
+                          {/* Mode Selection Tabs */}
                           <div style={{
-                            display: 'flex',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
                             gap: '12px',
-                            marginBottom: '20px',
-                            flexWrap: 'wrap'
+                            marginBottom: '24px'
                           }}>
                             <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => setIsDrawing(true)}
+                              whileHover={{ scale: 1.03 }}
+                              whileTap={{ scale: 0.97 }}
+                              onClick={() => {
+                                setDesignMode('draw');
+                                setIsCanvasDrawing(true);
+                                setUploadedDesign(null);
+                              }}
                               style={{
-                                padding: '12px 24px',
-                                backgroundColor: isDrawing 
-                                  ? 'rgba(251, 191, 36, 0.3)' 
+                                padding: '16px 20px',
+                                background: designMode === 'draw' 
+                                  ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, rgba(202, 138, 4, 0.3) 100%)'
                                   : 'rgba(255, 255, 255, 0.05)',
-                                border: isDrawing 
+                                border: designMode === 'draw' 
                                   ? '2px solid rgb(251, 191, 36)' 
                                   : '1px solid rgba(255, 255, 255, 0.2)',
-                                borderRadius: '8px',
+                                borderRadius: '10px',
                                 color: 'white',
                                 cursor: 'pointer',
                                 fontSize: '14px',
-                                fontWeight: '500',
-                                transition: 'all 0.3s'
+                                fontWeight: '600',
+                                transition: 'all 0.3s',
+                                textAlign: 'center'
                               }}
                             >
-                              ✏️ Draw Design
+                              <div style={{ fontSize: '28px', marginBottom: '8px' }}>✏️</div>
+                              <div>Freehand Draw</div>
                             </motion.button>
                             
-                            <label style={{ position: 'relative' }}>
-                              <motion.div
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                style={{
-                                  padding: '12px 24px',
-                                  backgroundColor: uploadedDesign 
-                                    ? 'rgba(251, 191, 36, 0.3)' 
-                                    : 'rgba(255, 255, 255, 0.05)',
-                                  border: uploadedDesign 
-                                    ? '2px solid rgb(251, 191, 36)' 
-                                    : '1px solid rgba(255, 255, 255, 0.2)',
-                                  borderRadius: '8px',
-                                  color: 'white',
-                                  cursor: 'pointer',
-                                  fontSize: '14px',
-                                  fontWeight: '500',
-                                  transition: 'all 0.3s',
-                                  display: 'inline-block'
-                                }}
-                              >
-                                📤 Upload Design
-                              </motion.div>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileUpload}
-                                style={{ display: 'none' }}
-                              />
-                            </label>
+                            <motion.button
+                              whileHover={{ scale: 1.03 }}
+                              whileTap={{ scale: 0.97 }}
+                              onClick={() => {
+                                setDesignMode('shapes');
+                                setIsCanvasDrawing(false);
+                                setUploadedDesign(null);
+                                const canvas = canvasRef.current;
+                                if (canvas) {
+                                  const ctx = canvas.getContext('2d');
+                                  if (ctx) {
+                                    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                  }
+                                }
+                              }}
+                              style={{
+                                padding: '16px 20px',
+                                background: designMode === 'shapes' 
+                                  ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, rgba(202, 138, 4, 0.3) 100%)'
+                                  : 'rgba(255, 255, 255, 0.05)',
+                                border: designMode === 'shapes' 
+                                  ? '2px solid rgb(251, 191, 36)' 
+                                  : '1px solid rgba(255, 255, 255, 0.2)',
+                                borderRadius: '10px',
+                                color: 'white',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                transition: 'all 0.3s',
+                                textAlign: 'center'
+                              }}
+                            >
+                              <div style={{ fontSize: '28px', marginBottom: '8px' }}>⬡</div>
+                              <div>3D Shapes</div>
+                            </motion.button>
 
-                            {(isDrawing || uploadedDesign) && (
-                              <motion.button
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => {
-                                  setIsDrawing(false);
-                                  setUploadedDesign(null);
-                                  clearCanvas();
-                                }}
-                                style={{
-                                  padding: '12px 24px',
-                                  backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                                  border: '1px solid rgb(239, 68, 68)',
-                                  borderRadius: '8px',
-                                  color: 'white',
-                                  cursor: 'pointer',
-                                  fontSize: '14px',
-                                  fontWeight: '500',
-                                  transition: 'all 0.3s'
-                                }}
-                              >
-                                🗑️ Clear
-                              </motion.button>
-                            )}
+                            <motion.button
+                              whileHover={{ scale: 1.03 }}
+                              whileTap={{ scale: 0.97 }}
+                              onClick={() => {
+                                setDesignMode('upload');
+                                setIsCanvasDrawing(false);
+                              }}
+                              style={{
+                                padding: '16px 20px',
+                                background: designMode === 'upload' 
+                                  ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, rgba(202, 138, 4, 0.3) 100%)'
+                                  : 'rgba(255, 255, 255, 0.05)',
+                                border: designMode === 'upload' 
+                                  ? '2px solid rgb(251, 191, 36)' 
+                                  : '1px solid rgba(255, 255, 255, 0.2)',
+                                borderRadius: '10px',
+                                color: 'white',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                transition: 'all 0.3s',
+                                textAlign: 'center'
+                              }}
+                            >
+                              <div style={{ fontSize: '28px', marginBottom: '8px' }}>📤</div>
+                              <div>Upload Image</div>
+                            </motion.button>
                           </div>
 
-                          {/* Drawing Canvas */}
-                          {isDrawing && (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              style={{
-                                border: '2px dashed rgba(251, 191, 36, 0.5)',
-                                borderRadius: '8px',
-                                overflow: 'hidden',
-                                backgroundColor: 'rgba(255, 255, 255, 0.03)'
-                              }}
-                            >
-                              <canvas
-                                ref={canvasRef}
-                                width={800}
-                                height={500}
-                                style={{
-                                  width: '100%',
-                                  height: 'auto',
-                                  display: 'block',
-                                  cursor: 'crosshair'
-                                }}
-                              />
-                              <div style={{
-                                padding: '12px',
-                                textAlign: 'center',
-                                color: 'rgba(255, 255, 255, 0.6)',
-                                fontSize: '13px',
-                                backgroundColor: 'rgba(0, 0, 0, 0.3)'
-                              }}>
-                                💡 Draw your custom design with your mouse. Our artisans will bring it to life!
+                          {/* Canvas and Shapes Section */}
+                          {(designMode === 'draw' || designMode === 'shapes') && (
+                            <div style={{ display: 'flex', gap: '20px', flexDirection: 'row' }}>
+                              {/* Shape Palette - Only show for shapes mode */}
+                              {designMode === 'shapes' && (
+                                <motion.div
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  style={{
+                                    minWidth: '140px',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                                    borderRadius: '10px',
+                                    padding: '16px',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                                  }}
+                                >
+                                  <div style={{
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    fontSize: '13px',
+                                    fontWeight: '600',
+                                    marginBottom: '16px',
+                                    textAlign: 'center'
+                                  }}>
+                                    Shapes & Designs
+                                  </div>
+                                  {[
+                                    { value: 'circle', icon: '⚪', label: 'Circle' },
+                                    { value: 'square', icon: '⬜', label: 'Square' },
+                                    { value: 'triangle', icon: '🔺', label: 'Triangle' },
+                                    { value: 'diamond', icon: '💎', label: 'Diamond' },
+                                    { value: 'star', icon: '⭐', label: 'Star' },
+                                    { value: 'heart', icon: '❤️', label: 'Heart' },
+                                    { value: 'oval', icon: '⬭', label: 'Oval' },
+                                    { value: 'hexagon', icon: '⬡', label: 'Hexagon' },
+                                    { value: 'flower', icon: '🌸', label: 'Flower' },
+                                    { value: 'moon', icon: '🌙', label: 'Crescent' }
+                                  ].map((shape) => (
+                                    <motion.button
+                                      key={shape.value}
+                                      whileHover={{ scale: 1.1, x: 5 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      onClick={() => {
+                                        setSelectedShape(shape.value);
+                                        addShapeToCanvas(shape.value);
+                                      }}
+                                      style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        marginBottom: '8px',
+                                        backgroundColor: selectedShape === shape.value 
+                                          ? 'rgba(251, 191, 36, 0.3)' 
+                                          : 'rgba(255, 255, 255, 0.05)',
+                                        border: selectedShape === shape.value 
+                                          ? '2px solid rgb(251, 191, 36)' 
+                                          : '1px solid rgba(255, 255, 255, 0.15)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        cursor: 'pointer',
+                                        fontSize: '13px',
+                                        transition: 'all 0.2s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
+                                      }}
+                                    >
+                                      <span style={{ fontSize: '20px' }}>{shape.icon}</span>
+                                      <span>{shape.label}</span>
+                                    </motion.button>
+                                  ))}
+                                </motion.div>
+                              )}
+
+                              {/* Canvas Area */}
+                              <div style={{ flex: 1 }}>
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.95 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  style={{
+                                    border: '2px dashed rgba(251, 191, 36, 0.5)',
+                                    borderRadius: '12px',
+                                    overflow: 'hidden',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                                    position: 'relative'
+                                  }}
+                                >
+                                  {/* Drawing Tools - Only for draw mode */}
+                                  {designMode === 'draw' && (
+                                    <div style={{
+                                      position: 'absolute',
+                                      top: '12px',
+                                      left: '12px',
+                                      display: 'flex',
+                                      gap: '8px',
+                                      zIndex: 10
+                                    }}>
+                                      <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => {
+                                          setDrawMode('pen');
+                                          setLineStart(null);
+                                        }}
+                                        style={{
+                                          padding: '10px 16px',
+                                          background: drawMode === 'pen' 
+                                            ? 'linear-gradient(135deg, rgb(251, 191, 36), rgb(202, 138, 4))'
+                                            : 'rgba(0, 0, 0, 0.7)',
+                                          border: drawMode === 'pen' ? 'none' : '1px solid rgba(255, 255, 255, 0.3)',
+                                          borderRadius: '8px',
+                                          color: 'white',
+                                          cursor: 'pointer',
+                                          fontSize: '13px',
+                                          fontWeight: '600',
+                                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '6px'
+                                        }}
+                                      >
+                                        ✏️ Pen
+                                      </motion.button>
+                                      
+                                      <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => {
+                                          setDrawMode('line');
+                                          setLineStart(null);
+                                        }}
+                                        style={{
+                                          padding: '10px 16px',
+                                          background: drawMode === 'line' 
+                                            ? 'linear-gradient(135deg, rgb(251, 191, 36), rgb(202, 138, 4))'
+                                            : 'rgba(0, 0, 0, 0.7)',
+                                          border: drawMode === 'line' ? 'none' : '1px solid rgba(255, 255, 255, 0.3)',
+                                          borderRadius: '8px',
+                                          color: 'white',
+                                          cursor: 'pointer',
+                                          fontSize: '13px',
+                                          fontWeight: '600',
+                                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '6px'
+                                        }}
+                                      >
+                                        📏 Line
+                                      </motion.button>
+                                      
+                                      <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => {
+                                          setDrawMode('eraser');
+                                          setLineStart(null);
+                                        }}
+                                        style={{
+                                          padding: '10px 16px',
+                                          background: drawMode === 'eraser' 
+                                            ? 'linear-gradient(135deg, rgb(251, 191, 36), rgb(202, 138, 4))'
+                                            : 'rgba(0, 0, 0, 0.7)',
+                                          border: drawMode === 'eraser' ? 'none' : '1px solid rgba(255, 255, 255, 0.3)',
+                                          borderRadius: '8px',
+                                          color: 'white',
+                                          cursor: 'pointer',
+                                          fontSize: '13px',
+                                          fontWeight: '600',
+                                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '6px'
+                                        }}
+                                      >
+                                        🧹 Eraser
+                                      </motion.button>
+                                    </div>
+                                  )}
+
+                                  {/* Layered Canvas System */}
+                                  <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
+                                    {/* Background canvas for drawings */}
+                                    <canvas
+                                      ref={backgroundCanvasRef}
+                                      width={1000}
+                                      height={600}
+                                      style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: 'auto',
+                                        display: 'block',
+                                        pointerEvents: designMode === 'draw' ? 'auto' : 'none',
+                                        cursor: designMode === 'draw' 
+                                          ? (drawMode === 'eraser' ? 'cell' : drawMode === 'line' ? 'crosshair' : 'crosshair')
+                                          : 'default'
+                                      }}
+                                    />
+                                    
+                                    {/* Foreground canvas for shapes */}
+                                    <canvas
+                                      ref={canvasRef}
+                                      width={1000}
+                                      height={600}
+                                      style={{
+                                        position: 'relative',
+                                        width: '100%',
+                                        height: 'auto',
+                                        display: 'block',
+                                        pointerEvents: designMode === 'shapes' ? 'auto' : 'none',
+                                        cursor: designMode === 'shapes'
+                                          ? (isDragging ? 'grabbing' : isResizing ? 'nwse-resize' : 'default')
+                                          : 'default'
+                                      }}
+                                    />
+                                  </div>
+                                  
+                                  {/* Action Buttons */}
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: '12px',
+                                    right: '12px',
+                                    display: 'flex',
+                                    gap: '8px',
+                                    zIndex: 10
+                                  }}>
+                                    {/* Save Button */}
+                                    <motion.button
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      onClick={saveDesign}
+                                      style={{
+                                        padding: '10px 20px',
+                                        background: 'linear-gradient(135deg, rgb(34, 197, 94), rgb(22, 163, 74))',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        cursor: 'pointer',
+                                        fontSize: '13px',
+                                        fontWeight: '600',
+                                        boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)'
+                                      }}
+                                    >
+                                      💾 Save Design
+                                    </motion.button>
+
+                                    {/* Delete Shape - Only show when shape is selected */}
+                                    {designMode === 'shapes' && selectedShapeIndex !== null && (
+                                      <motion.button
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={deleteSelectedShape}
+                                        style={{
+                                          padding: '10px 20px',
+                                          background: 'rgba(239, 68, 68, 0.9)',
+                                          border: 'none',
+                                          borderRadius: '8px',
+                                          color: 'white',
+                                          cursor: 'pointer',
+                                          fontSize: '13px',
+                                          fontWeight: '600',
+                                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                                        }}
+                                      >
+                                        🗑️ Delete
+                                      </motion.button>
+                                    )}
+                                    
+                                    {/* Clear All Button */}
+                                    <motion.button
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      onClick={clearCanvas}
+                                      style={{
+                                        padding: '10px 20px',
+                                        background: 'rgba(239, 68, 68, 0.9)',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        cursor: 'pointer',
+                                        fontSize: '13px',
+                                        fontWeight: '600',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                                      }}
+                                    >
+                                      🗑️ Clear All
+                                    </motion.button>
+                                  </div>
+
+                                  <div style={{
+                                    padding: '12px',
+                                    textAlign: 'center',
+                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    fontSize: '13px',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                                    borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                                  }}>
+                                    {designMode === 'draw' 
+                                      ? (drawMode === 'pen' 
+                                          ? '✨ Draw your custom jewelry design with your mouse or touch!' 
+                                          : drawMode === 'line'
+                                          ? '📏 Click two points to draw a straight line!'
+                                          : '🧹 Use eraser to remove parts of your drawing!')
+                                      : (selectedShapeIndex !== null
+                                          ? '💎 Drag to move • Drag edge to resize • Click Delete to remove!'
+                                          : '💎 Click shapes to add them • Click a shape to select • Drag edge to resize!')}
+                                  </div>
+                                </motion.div>
                               </div>
-                            </motion.div>
+                            </div>
                           )}
 
-                          {/* Uploaded Image Preview */}
-                          {uploadedDesign && (
+                          {/* Upload Section */}
+                          {designMode === 'upload' && (
                             <motion.div
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              style={{
-                                border: '2px solid rgba(251, 191, 36, 0.5)',
-                                borderRadius: '8px',
-                                overflow: 'hidden',
-                                maxHeight: '400px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                backgroundColor: 'rgba(0, 0, 0, 0.3)'
-                              }}
                             >
-                              <img
-                                src={uploadedDesign}
-                                alt="Uploaded design"
-                                style={{
-                                  maxWidth: '100%',
-                                  maxHeight: '400px',
-                                  objectFit: 'contain'
+                              {!uploadedDesign ? (
+                                <label style={{
+                                  display: 'block',
+                                  padding: '60px',
+                                  border: '3px dashed rgba(251, 191, 36, 0.5)',
+                                  borderRadius: '12px',
+                                  textAlign: 'center',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.3s',
+                                  backgroundColor: 'rgba(0, 0, 0, 0.2)'
                                 }}
-                              />
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'rgba(251, 191, 36, 0.1)';
+                                  e.currentTarget.style.borderColor = 'rgb(251, 191, 36)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+                                  e.currentTarget.style.borderColor = 'rgba(251, 191, 36, 0.5)';
+                                }}
+                                >
+                                  <div style={{ fontSize: '64px', marginBottom: '16px' }}>📤</div>
+                                  <div style={{ color: 'white', fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
+                                    Upload Your Design
+                                  </div>
+                                  <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>
+                                    Click or drag & drop your image here
+                                  </div>
+                                  <div style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '12px', marginTop: '8px' }}>
+                                    Supports JPG, PNG, SVG
+                                  </div>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileUpload}
+                                    style={{ display: 'none' }}
+                                  />
+                                </label>
+                              ) : (
+                                <div style={{ position: 'relative' }}>
+                                  <img
+                                    src={uploadedDesign}
+                                    alt="Uploaded design"
+                                    style={{
+                                      width: '100%',
+                                      maxHeight: '500px',
+                                      objectFit: 'contain',
+                                      borderRadius: '12px',
+                                      border: '2px solid rgba(251, 191, 36, 0.5)'
+                                    }}
+                                  />
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setUploadedDesign(null)}
+                                    style={{
+                                      position: 'absolute',
+                                      top: '12px',
+                                      right: '12px',
+                                      padding: '10px 20px',
+                                      background: 'rgba(239, 68, 68, 0.9)',
+                                      border: 'none',
+                                      borderRadius: '8px',
+                                      color: 'white',
+                                      cursor: 'pointer',
+                                      fontSize: '13px',
+                                      fontWeight: '600'
+                                    }}
+                                  >
+                                    🗑️ Remove
+                                  </motion.button>
+                                </div>
+                              )}
                             </motion.div>
                           )}
 
-                          {!isDrawing && !uploadedDesign && (
+                          {/* Empty State */}
+                          {!designMode && (
                             <div style={{
                               textAlign: 'center',
-                              padding: '60px 20px',
+                              padding: '80px 20px',
                               color: 'rgba(255, 255, 255, 0.5)',
-                              fontSize: '14px',
-                              border: '2px dashed rgba(255, 255, 255, 0.2)',
-                              borderRadius: '8px'
+                              fontSize: '14px'
                             }}>
-                              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎨</div>
-                              <p>Share your vision with us!</p>
-                              <p style={{ marginTop: '8px' }}>Draw or upload your custom jewelry design</p>
+                              <div style={{ fontSize: '64px', marginBottom: '20px' }}>🎨</div>
+                              <div style={{ fontSize: '18px', color: 'white', marginBottom: '12px', fontWeight: '600' }}>
+                                Bring Your Vision to Life!
+                              </div>
+                              <p style={{ marginBottom: '8px' }}>Choose a design mode above to get started</p>
+                              <p style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '13px' }}>
+                                Our master artisans will craft your unique design
+                              </p>
                             </div>
                           )}
                         </div>
