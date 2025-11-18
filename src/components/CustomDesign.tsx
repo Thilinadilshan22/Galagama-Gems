@@ -61,42 +61,42 @@ export function CustomDesign() {
       label: '24K Gold', 
       price: 500, 
       color: '#FFD700',
-      image: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?w=300&h=300&fit=crop&q=80'
+      image: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?w=300&h=300&fit=crop&q=80&auto=format'
     },
     { 
       value: 'gold-18k', 
       label: '18K Gold', 
       price: 350, 
       color: '#F4C430',
-      image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=300&h=300&fit=crop&q=80'
+      image: 'https://images.unsplash.com/photo-1618042164219-62c820f10723?w=300&h=300&fit=crop&q=80&auto=format'
     },
     { 
       value: 'white-gold', 
       label: 'White Gold', 
       price: 400, 
       color: '#E8E8E8',
-      image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300&h=300&fit=crop&q=80'
+      image: 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?w=300&h=300&fit=crop&q=80&auto=format'
     },
     { 
       value: 'rose-gold', 
       label: 'Rose Gold', 
       price: 420, 
       color: '#B76E79',
-      image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop&q=80'
+      image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343a?w=300&h=300&fit=crop&q=80&auto=format'
     },
     { 
       value: 'platinum', 
       label: 'Platinum', 
       price: 600, 
       color: '#E5E4E2',
-      image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=300&h=300&fit=crop&q=80'
+      image: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=300&h=300&fit=crop&q=80&auto=format'
     },
     { 
       value: 'silver', 
       label: 'Sterling Silver', 
       price: 150, 
       color: '#C0C0C0',
-      image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=300&h=300&fit=crop&q=80'
+      image: 'https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=300&h=300&fit=crop&q=80&auto=format'
     },
   ];
 
@@ -114,28 +114,28 @@ export function CustomDesign() {
         label: 'Diamond', 
         price: 800, 
         color: '#B9F2FF',
-        image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=300&h=300&fit=crop&q=80&auto=format'
       },
       { 
         value: 'ruby', 
         label: 'Ruby', 
         price: 600, 
         color: '#E0115F',
-        image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1605100804999-1fdd6f4e4f3d?w=300&h=300&fit=crop&q=80&auto=format'
       },
       { 
         value: 'sapphire', 
         label: 'Sapphire', 
         price: 550, 
         color: '#0F52BA',
-        image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=300&h=300&fit=crop&q=80&auto=format'
       },
       { 
         value: 'emerald', 
         label: 'Emerald', 
         price: 650, 
         color: '#50C878',
-        image: 'https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?w=300&h=300&fit=crop&q=80&auto=format'
       },
     ],
     'semi-precious': [
@@ -144,42 +144,42 @@ export function CustomDesign() {
         label: 'Amethyst', 
         price: 150, 
         color: '#9966CC',
-        image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=300&h=300&fit=crop&q=80&auto=format'
       },
       { 
         value: 'topaz', 
         label: 'Topaz', 
         price: 180, 
         color: '#FFC87C',
-        image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1634755974992-c3e8046b0d4b?w=300&h=300&fit=crop&q=80&auto=format'
       },
       { 
         value: 'aquamarine', 
         label: 'Aquamarine', 
         price: 200, 
         color: '#7FFFD4',
-        image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=300&h=300&fit=crop&q=80&auto=format'
       },
       { 
         value: 'garnet', 
         label: 'Garnet', 
         price: 120, 
         color: '#733635',
-        image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1635767798597-99c5f0d4b12d?w=300&h=300&fit=crop&q=80&auto=format'
       },
       { 
         value: 'opal', 
         label: 'Opal', 
         price: 220, 
         color: '#A8C3BC',
-        image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=300&h=300&fit=crop&q=80&auto=format'
       },
       { 
         value: 'turquoise', 
         label: 'Turquoise', 
         price: 100, 
         color: '#40E0D0',
-        image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1634226005148-f85c5d6c5dcb?w=300&h=300&fit=crop&q=80&auto=format'
       },
     ],
     synthetic: [
@@ -188,20 +188,26 @@ export function CustomDesign() {
         label: 'Cubic Zirconia', 
         price: 50, 
         color: '#FFFFFF',
-        image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=300&h=300&fit=crop&q=80&auto=format'
       },
       { 
         value: 'moissanite', 
         label: 'Moissanite', 
         price: 250, 
         color: '#F0EAD6',
-        image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=300&h=300&fit=crop&q=80'
+        image: 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=300&h=300&fit=crop&q=80&auto=format'
       },
     ],
     none: [],
   };
 
-  const sizes = ['XS', 'S', 'M', 'L', 'XL'];
+  const sizes = [
+    { value: 'XS', price: 0 },
+    { value: 'S', price: 50 },
+    { value: 'M', price: 100 },
+    { value: 'L', price: 150 },
+    { value: 'XL', price: 200 }
+  ];
 
   // Canvas drawing setup with eraser and line tool - draws on background layer
   useEffect(() => {
@@ -670,11 +676,16 @@ export function CustomDesign() {
       if (gem) price += gem.price;
     }
     
+    if (selectedSize) {
+      const size = sizes.find(s => s.value === selectedSize);
+      if (size) price += size.price;
+    }
+    
     if (engravingText) price += 80;
     if (uploadedDesign || designMode) price += 150; // Custom design fee
     
     setEstimatedPrice(price);
-  }, [selectedMetal, selectedGemType, selectedGemstone, engravingText, uploadedDesign, designMode]);
+  }, [selectedMetal, selectedGemType, selectedGemstone, selectedSize, engravingText, uploadedDesign, designMode]);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -1875,17 +1886,17 @@ export function CustomDesign() {
                         }}>
                           {sizes.map((size) => (
                             <motion.button
-                              key={size}
+                              key={size.value}
                               whileHover={{ scale: 1.1, rotate: 5 }}
                               whileTap={{ scale: 0.9 }}
-                              onClick={() => setSelectedSize(size)}
+                              onClick={() => setSelectedSize(size.value)}
                               style={{
-                                width: '70px',
-                                height: '70px',
-                                backgroundColor: selectedSize === size 
+                                width: '90px',
+                                height: '90px',
+                                backgroundColor: selectedSize === size.value 
                                   ? 'rgba(251, 191, 36, 0.3)' 
                                   : 'rgba(255, 255, 255, 0.05)',
-                                border: selectedSize === size 
+                                border: selectedSize === size.value 
                                   ? '3px solid rgb(251, 191, 36)' 
                                   : '2px solid rgba(255, 255, 255, 0.2)',
                                 borderRadius: '12px',
@@ -1894,12 +1905,24 @@ export function CustomDesign() {
                                 fontSize: '20px',
                                 fontWeight: 'bold',
                                 transition: 'all 0.3s',
-                                boxShadow: selectedSize === size
+                                boxShadow: selectedSize === size.value
                                   ? '0 0 20px rgba(251, 191, 36, 0.4)'
-                                  : '0 2px 10px rgba(0, 0, 0, 0.2)'
+                                  : '0 2px 10px rgba(0, 0, 0, 0.2)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px'
                               }}
                             >
-                              {size}
+                              <div>{size.value}</div>
+                              <div style={{ 
+                                fontSize: '12px', 
+                                color: 'rgb(251, 191, 36)',
+                                fontWeight: '600'
+                              }}>
+                                {size.price > 0 ? `+$${size.price}` : 'Base'}
+                              </div>
                             </motion.button>
                           ))}
                         </div>
@@ -2151,55 +2174,6 @@ export function CustomDesign() {
                       Contact our design team
                     </a>
                   </p>
-
-                  {/* Features */}
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                    gap: '20px',
-                    marginTop: '40px',
-                    padding: '32px',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}>
-                    {[
-                      { icon: '✨', title: 'Handcrafted', desc: 'By master artisans' },
-                      { icon: '🎯', title: '100% Custom', desc: 'Designed by you' },
-                      { icon: '🚚', title: 'Free Shipping', desc: 'On all orders' },
-                      { icon: '🔒', title: 'Lifetime Warranty', desc: 'Quality guaranteed' }
-                    ].map((feature, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.7 + index * 0.1 }}
-                        whileHover={{ y: -5, scale: 1.05 }}
-                        style={{ 
-                          textAlign: 'center', 
-                          padding: '20px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                          borderRadius: '10px',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          transition: 'all 0.3s'
-                        }}
-                      >
-                        <div style={{ fontSize: '40px', marginBottom: '12px' }}>{feature.icon}</div>
-                        <div style={{ 
-                          color: 'white', 
-                          fontSize: '16px', 
-                          fontWeight: '600',
-                          marginBottom: '6px',
-                          fontFamily: "'Playfair Display', serif"
-                        }}>
-                          {feature.title}
-                        </div>
-                        <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '13px' }}>
-                          {feature.desc}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
                 </motion.div>
               </div>
             </motion.div>
