@@ -8,10 +8,13 @@ import { CustomDesign } from './components/CustomDesign';
 import { AboutUs } from './components/AboutUs';
 import { ContactUs } from './components/ContactUs';
 import { Cart } from './components/Cart';
+import { Footer } from './components/Footer';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { TermsAndConditions } from './components/TermsAndConditions';
 import { CartProvider, useCart } from './context/CartContext';
 
 function AppContent() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'custom-design' | 'about' | 'contact' | 'cart'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'custom-design' | 'about' | 'contact' | 'cart' | 'privacy' | 'terms'>('home');
   const [isLoaded, setIsLoaded] = useState(false);
   const { scrollY } = useScroll();
   const { addToCart } = useCart();
@@ -39,6 +42,10 @@ function AppContent() {
         setCurrentPage('contact');
       } else if (hash === 'cart') {
         setCurrentPage('cart');
+      } else if (hash === 'privacy') {
+        setCurrentPage('privacy');
+      } else if (hash === 'terms') {
+        setCurrentPage('terms');
       } else {
         setCurrentPage('home');
       }
@@ -57,6 +64,8 @@ function AppContent() {
       {currentPage === 'about' && <AboutUs />}
       {currentPage === 'contact' && <ContactUs />}
       {currentPage === 'cart' && <Cart />}
+      {currentPage === 'privacy' && <PrivacyPolicy />}
+      {currentPage === 'terms' && <TermsAndConditions />}
       {currentPage === 'home' && (
     <div className="min-h-screen">
       {/* Header Section with Parallax */}
@@ -163,6 +172,9 @@ function AppContent() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
       )}
     </>
