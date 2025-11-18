@@ -376,7 +376,7 @@ export function PrivacyPolicy() {
                   style={{ textAlign: 'center', marginTop: '32px' }}
                 >
                   <motion.a
-                    href="#"
+                    href="#signup"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.98 }}
                     style={{
@@ -398,7 +398,7 @@ export function PrivacyPolicy() {
                       e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
                     }}
                   >
-                    ← Back to Home
+                    ← Back to Sign Up
                   </motion.a>
                 </motion.div>
               </div>
