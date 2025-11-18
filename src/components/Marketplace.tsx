@@ -182,12 +182,30 @@ export function Marketplace() {
   });
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <div className="relative h-screen overflow-hidden">
+    <div style={{ minHeight: '100vh', backgroundColor: '#1a1a1a' }}>
+      {/* Background Section with Parallax - Covers entire page */}
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        bottom: 0, 
+        width: '100%',
+        height: '100vh',
+        zIndex: 0, 
+        overflow: 'hidden',
+        backgroundColor: '#1a1a1a'
+      }}>
+        {/* Background Image with Ken Burns Effect and Parallax */}
         <motion.div
-          style={{ y: backgroundY }}
-          className="absolute inset-0 w-full h-full"
+          style={{ 
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '150%',
+            willChange: 'transform'
+          }}
         >
           <motion.div
             initial={{ scale: 1, opacity: 0 }}
@@ -204,80 +222,83 @@ export function Marketplace() {
                 ease: "easeOut"
               }
             }}
-            className="w-full h-full"
+            style={{ width: '100%', height: '100%' }}
           >
-            <motion.div 
-              className="w-full h-full bg-cover bg-center"
-              initial={{ filter: "brightness(0.7) contrast(1)" }}
-              animate={{ 
-                filter: [
-                  "brightness(0.7) contrast(1)",
-                  "brightness(0.8) contrast(1.05)",
-                  "brightness(0.7) contrast(1)"
-                ]
-              }}
-              transition={{
-                duration: 8,
-                ease: "easeInOut",
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
+            <div
               style={{
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1920&q=80')`
+                width: '100%',
+                height: '100%',
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1920&q=80')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                filter: 'brightness(0.8) contrast(1.05)'
               }}
             />
           </motion.div>
         </motion.div>
 
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
+        {/* Overlay gradient */}
+        <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent, rgba(0, 0, 0, 0.5))' }} />
+      </div>
 
-        <div className="relative z-10 h-full flex flex-col">
-          <Navigation isLoaded={isLoaded} />
-          
-          <div className="flex-1 flex items-center justify-center px-8">
-            <div className="text-center max-w-4xl">
-              <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={isLoaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                style={{
-                  fontSize: '4.5rem',
-                  fontWeight: '700',
-                  color: 'white',
-                  marginBottom: '24px',
-                  textShadow: '2px 2px 20px rgba(0, 0, 0, 0.5)',
-                  lineHeight: '1.2'
-                }}
-              >
-                Jewelry <span style={{
-                  background: 'linear-gradient(to right, rgb(251, 191, 36), rgb(217, 119, 6))',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>Marketplace</span>
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={isLoaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                style={{
-                  fontSize: '1.25rem',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  maxWidth: '700px',
-                  margin: '0 auto',
-                  lineHeight: '1.8',
-                  textShadow: '1px 1px 10px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                Discover our exquisite collection of handcrafted jewelry. Each piece tells a unique story of elegance and beauty.
-              </motion.p>
-            </div>
+      {/* Hero Section */}
+      <div style={{ position: 'relative', minHeight: '50vh', display: 'flex', flexDirection: 'column', zIndex: 1 }}>
+        <Navigation isLoaded={isLoaded} />
+        
+        <div className="flex-1 flex items-center justify-center px-8" style={{ paddingTop: '60px', paddingBottom: '60px' }}>
+          <div className="text-center max-w-4xl">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={isLoaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              style={{
+                fontSize: '4.5rem',
+                fontWeight: '700',
+                color: 'white',
+                marginBottom: '24px',
+                textShadow: '2px 2px 20px rgba(0, 0, 0, 0.7)',
+                lineHeight: '1.2'
+              }}
+            >
+              Jewelry <span style={{
+                background: 'linear-gradient(to right, rgb(251, 191, 36), rgb(217, 119, 6))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>Marketplace</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={isLoaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              style={{
+                fontSize: '1.25rem',
+                color: 'rgba(255, 255, 255, 0.95)',
+                maxWidth: '700px',
+                margin: '0 auto',
+                lineHeight: '1.8',
+                textShadow: '1px 1px 10px rgba(0, 0, 0, 0.7)'
+              }}
+            >
+              Discover our exquisite collection of handcrafted jewelry. Each piece tells a unique story of elegance and beauty.
+            </motion.p>
           </div>
         </div>
       </div>
 
       {/* Filters Section */}
-      <div className="bg-white py-12 px-8" style={{ borderBottom: '1px solid rgba(0,0,0,0.1)' }}>
+      <div style={{ 
+        position: 'relative',
+        zIndex: 1,
+        padding: '48px 32px',
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.15)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
+        marginBottom: '0'
+      }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -287,10 +308,11 @@ export function Marketplace() {
             style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
           >
             <h2 style={{
-              fontSize: '1.5rem',
+              fontSize: '1.75rem',
               fontWeight: '600',
               marginBottom: '8px',
-              color: '#1f2937'
+              color: 'white',
+              textShadow: '2px 2px 10px rgba(0, 0, 0, 0.5)'
             }}>
               Filter Products
             </h2>
@@ -306,8 +328,9 @@ export function Marketplace() {
                   display: 'block', 
                   marginBottom: '8px', 
                   fontWeight: '500',
-                  color: '#374151',
-                  fontSize: '0.95rem'
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '0.95rem',
+                  textShadow: '1px 1px 5px rgba(0, 0, 0, 0.5)'
                 }}>
                   Category
                 </label>
@@ -318,17 +341,25 @@ export function Marketplace() {
                     width: '100%',
                     padding: '12px 16px',
                     borderRadius: '8px',
-                    border: '2px solid #e5e7eb',
+                    border: '1px solid rgba(251, 191, 36, 0.3)',
                     fontSize: '1rem',
-                    backgroundColor: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                    backdropFilter: 'blur(5px)',
+                    color: 'white',
                     cursor: 'pointer',
-                    transition: 'border-color 0.3s ease'
+                    transition: 'all 0.3s ease'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = 'rgb(251, 191, 36)'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'rgb(251, 191, 36)';
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(251, 191, 36, 0.3)';
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                  }}
                 >
                   {categories.map(cat => (
-                    <option key={cat.value} value={cat.value}>{cat.label}</option>
+                    <option key={cat.value} value={cat.value} style={{ backgroundColor: '#1f2937', color: 'white' }}>{cat.label}</option>
                   ))}
                 </select>
               </div>
@@ -339,8 +370,9 @@ export function Marketplace() {
                   display: 'block', 
                   marginBottom: '8px', 
                   fontWeight: '500',
-                  color: '#374151',
-                  fontSize: '0.95rem'
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '0.95rem',
+                  textShadow: '1px 1px 5px rgba(0, 0, 0, 0.5)'
                 }}>
                   Metal Type
                 </label>
@@ -351,17 +383,25 @@ export function Marketplace() {
                     width: '100%',
                     padding: '12px 16px',
                     borderRadius: '8px',
-                    border: '2px solid #e5e7eb',
+                    border: '1px solid rgba(251, 191, 36, 0.3)',
                     fontSize: '1rem',
-                    backgroundColor: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                    backdropFilter: 'blur(5px)',
+                    color: 'white',
                     cursor: 'pointer',
-                    transition: 'border-color 0.3s ease'
+                    transition: 'all 0.3s ease'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = 'rgb(251, 191, 36)'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'rgb(251, 191, 36)';
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(251, 191, 36, 0.3)';
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                  }}
                 >
                   {metals.map(metal => (
-                    <option key={metal.value} value={metal.value}>{metal.label}</option>
+                    <option key={metal.value} value={metal.value} style={{ backgroundColor: '#1f2937', color: 'white' }}>{metal.label}</option>
                   ))}
                 </select>
               </div>
@@ -372,8 +412,9 @@ export function Marketplace() {
                   display: 'block', 
                   marginBottom: '8px', 
                   fontWeight: '500',
-                  color: '#374151',
-                  fontSize: '0.95rem'
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '0.95rem',
+                  textShadow: '1px 1px 5px rgba(0, 0, 0, 0.5)'
                 }}>
                   Price Range
                 </label>
@@ -384,17 +425,25 @@ export function Marketplace() {
                     width: '100%',
                     padding: '12px 16px',
                     borderRadius: '8px',
-                    border: '2px solid #e5e7eb',
+                    border: '1px solid rgba(251, 191, 36, 0.3)',
                     fontSize: '1rem',
-                    backgroundColor: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                    backdropFilter: 'blur(5px)',
+                    color: 'white',
                     cursor: 'pointer',
-                    transition: 'border-color 0.3s ease'
+                    transition: 'all 0.3s ease'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = 'rgb(251, 191, 36)'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'rgb(251, 191, 36)';
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(251, 191, 36, 0.3)';
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                  }}
                 >
                   {priceRanges.map(range => (
-                    <option key={range.value} value={range.value}>{range.label}</option>
+                    <option key={range.value} value={range.value} style={{ backgroundColor: '#1f2937', color: 'white' }}>{range.label}</option>
                   ))}
                 </select>
               </div>
@@ -406,7 +455,11 @@ export function Marketplace() {
               gap: '12px',
               paddingTop: '8px'
             }}>
-              <span style={{ color: '#6b7280', fontSize: '0.95rem' }}>
+              <span style={{ 
+                color: 'rgba(255, 255, 255, 0.85)', 
+                fontSize: '0.95rem',
+                textShadow: '1px 1px 5px rgba(0, 0, 0, 0.5)'
+              }}>
                 Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
               </span>
               {(selectedCategory !== 'all' || selectedMetal !== 'all' || priceRange !== 'all') && (
@@ -419,23 +472,24 @@ export function Marketplace() {
                     setPriceRange('all');
                   }}
                   style={{
-                    padding: '6px 12px',
-                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
                     border: '1px solid rgb(251, 191, 36)',
-                    background: 'transparent',
-                    color: 'rgb(202, 138, 4)',
+                    background: 'rgba(251, 191, 36, 0.2)',
+                    color: 'rgb(251, 191, 36)',
                     fontSize: '0.875rem',
-                    fontWeight: '500',
+                    fontWeight: '600',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 8px rgba(251, 191, 36, 0.3)'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'rgb(251, 191, 36)';
                     e.currentTarget.style.color = 'black';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = 'rgb(202, 138, 4)';
+                    e.currentTarget.style.background = 'rgba(251, 191, 36, 0.2)';
+                    e.currentTarget.style.color = 'rgb(251, 191, 36)';
                   }}
                 >
                   Clear Filters
@@ -447,7 +501,13 @@ export function Marketplace() {
       </div>
 
       {/* Products Grid */}
-      <div className="bg-white py-20 px-8">
+      <div style={{ 
+        position: 'relative',
+        zIndex: 1,
+        padding: '80px 32px',
+        minHeight: '50vh',
+        backgroundColor: 'transparent'
+      }}>
         <div className="max-w-7xl mx-auto">
           {filteredProducts.length === 0 ? (
             <motion.div
@@ -456,10 +516,14 @@ export function Marketplace() {
               style={{
                 textAlign: 'center',
                 padding: '60px 20px',
-                color: '#6b7280'
+                color: 'rgba(255, 255, 255, 0.8)',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
-              <p style={{ fontSize: '1.5rem', marginBottom: '12px' }}>No products found</p>
+              <p style={{ fontSize: '1.5rem', marginBottom: '12px', fontWeight: '600' }}>No products found</p>
               <p style={{ fontSize: '1rem' }}>Try adjusting your filters</p>
             </motion.div>
           ) : (
@@ -471,10 +535,20 @@ export function Marketplace() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.05 }}
-                  className="bg-gray-100 rounded-lg overflow-hidden"
                   style={{ 
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                    position: 'relative'
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                    position: 'relative',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                  }}
+                  whileHover={{
+                    y: -8,
+                    boxShadow: '0 12px 40px rgba(251, 191, 36, 0.3)'
                   }}
                 >
                   {product.featured && (
@@ -490,13 +564,15 @@ export function Marketplace() {
                       fontWeight: '700',
                       zIndex: 10,
                       textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
+                      letterSpacing: '0.5px',
+                      boxShadow: '0 4px 12px rgba(251, 191, 36, 0.5)'
                     }}>
                       Featured
                     </div>
                   )}
                   <motion.div
-                    className="aspect-square bg-gray-300 overflow-hidden"
+                    className="aspect-square overflow-hidden"
+                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
@@ -508,27 +584,38 @@ export function Marketplace() {
                     />
                   </motion.div>
                   <div className="p-8">
-                    <h3 className="mb-2" style={{ fontSize: '1.5rem', fontWeight: '600' }}>
+                    <h3 className="mb-2" style={{ 
+                      fontSize: '1.5rem', 
+                      fontWeight: '600',
+                      color: 'white',
+                      textShadow: '2px 2px 8px rgba(0, 0, 0, 0.5)'
+                    }}>
                       {product.name}
                     </h3>
-                    <p className="text-gray-600 mb-3" style={{ fontSize: '0.95rem', lineHeight: '1.6' }}>
+                    <p style={{ 
+                      fontSize: '0.95rem', 
+                      lineHeight: '1.6',
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      marginBottom: '12px'
+                    }}>
                       {product.description}
                     </p>
                     <p style={{
                       fontSize: '0.875rem',
-                      color: '#6b7280',
-                      marginBottom: '0.75rem',
-                      fontWeight: '500'
+                      color: 'rgba(251, 191, 36, 0.9)',
+                      marginBottom: '12px',
+                      fontWeight: '600'
                     }}>
                       {product.metal}
                     </p>
                     <p className="mb-4" style={{
-                      background: 'linear-gradient(to right, rgb(251, 191, 36), rgb(202, 138, 4))',
+                      background: 'linear-gradient(to right, rgb(251, 191, 36), rgb(217, 119, 6))',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text',
                       fontWeight: '700',
-                      fontSize: '1.5rem'
+                      fontSize: '1.75rem',
+                      textShadow: '0 2px 10px rgba(251, 191, 36, 0.3)'
                     }}>
                       ${product.price.toLocaleString()}
                     </p>
@@ -549,13 +636,14 @@ export function Marketplace() {
                       style={{
                         width: '100%',
                         padding: '12px 24px',
-                        background: 'linear-gradient(to right, rgb(251, 191, 36), rgb(202, 138, 4))',
+                        background: 'linear-gradient(to right, rgb(251, 191, 36), rgb(217, 119, 6))',
                         color: 'black',
                         fontWeight: '600',
                         borderRadius: '8px',
                         border: 'none',
                         cursor: 'pointer',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 4px 15px rgba(251, 191, 36, 0.4)'
                       }}
                     >
                       Add to Cart
@@ -568,7 +656,9 @@ export function Marketplace() {
         </div>
       </div>
 
-      <Footer />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <Footer />
+      </div>
     </div>
   );
 }
