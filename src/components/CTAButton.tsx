@@ -4,15 +4,23 @@ import { motion } from 'motion/react';
 interface CTAButtonProps {
   children: React.ReactNode;
   variant: 'primary' | 'secondary';
+  href?: string;
 }
 
-export function CTAButton({ children, variant }: CTAButtonProps) {
+export function CTAButton({ children, variant, href }: CTAButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const isPrimary = variant === 'primary';
 
+  const handleClick = () => {
+    if (href) {
+      window.location.hash = href;
+    }
+  };
+
   return (
     <motion.button
+      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       animate={{

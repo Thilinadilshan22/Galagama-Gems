@@ -36,8 +36,8 @@ export function HeroContent({ isLoaded }: HeroContentProps) {
           transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <CTAButton variant="primary">Start Designing</CTAButton>
-          <CTAButton variant="secondary">Explore Marketplace</CTAButton>
+          <CTAButton variant="primary" href="custom-design">Start Designing</CTAButton>
+          <CTAButton variant="secondary" href="marketplace">Explore Marketplace</CTAButton>
         </motion.div>
       </div>
     </div>

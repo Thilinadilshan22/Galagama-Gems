@@ -5,6 +5,7 @@ import { HeroContent } from './components/HeroContent';
 import { Login } from './components/Login';
 import { Signup } from './components/Signup';
 import { CustomDesign } from './components/CustomDesign';
+import { Marketplace } from './components/Marketplace';
 import { AboutUs } from './components/AboutUs';
 import { ContactUs } from './components/ContactUs';
 import { Cart } from './components/Cart';
@@ -15,7 +16,7 @@ import { TermsAndConditions } from './components/TermsAndConditions';
 import { CartProvider, useCart } from './context/CartContext';
 
 function AppContent() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'custom-design' | 'about' | 'contact' | 'cart' | 'packages' | 'privacy' | 'terms'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'custom-design' | 'marketplace' | 'about' | 'contact' | 'cart' | 'packages' | 'privacy' | 'terms'>('home');
   const [isLoaded, setIsLoaded] = useState(false);
   const { scrollY } = useScroll();
   const { addToCart } = useCart();
@@ -37,6 +38,8 @@ function AppContent() {
         setCurrentPage('signup');
       } else if (hash === 'custom-design') {
         setCurrentPage('custom-design');
+      } else if (hash === 'marketplace') {
+        setCurrentPage('marketplace');
       } else if (hash === 'about') {
         setCurrentPage('about');
       } else if (hash === 'contact') {
@@ -64,6 +67,7 @@ function AppContent() {
       {currentPage === 'login' && <Login />}
       {currentPage === 'signup' && <Signup />}
       {currentPage === 'custom-design' && <CustomDesign />}
+      {currentPage === 'marketplace' && <Marketplace />}
       {currentPage === 'about' && <AboutUs />}
       {currentPage === 'contact' && <ContactUs />}
       {currentPage === 'cart' && <Cart />}
@@ -130,8 +134,15 @@ function AppContent() {
       </div>
 
       {/* Featured Products Section */}
-      <div className="bg-white py-20 px-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="relative py-20 px-8" style={{ 
+        background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',
+      }}>
+        {/* Decorative overlay */}
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(251, 191, 36, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(251, 191, 36, 0.2) 0%, transparent 50%)'
+        }} />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -185,13 +196,19 @@ function AppContent() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-gray-100 rounded-lg overflow-hidden"
-                style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+                className="rounded-lg overflow-hidden"
+                style={{ 
+                  background: 'rgba(30, 41, 59, 0.5)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(251, 191, 36, 0.1)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+                }}
               >
                 <motion.div 
-                  className="aspect-square bg-gray-300 overflow-hidden"
+                  className="aspect-square overflow-hidden relative"
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.3 }}
+                  style={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   <img 
                     src={item.image} 
@@ -199,15 +216,16 @@ function AppContent() {
                     className="w-full h-full object-cover"
                     style={{ objectPosition: 'center' }}
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </motion.div>
                 <div className="p-8">
-                  <h3 className="mb-2" style={{ fontSize: '1.5rem', fontWeight: '600' }}>{item.name}</h3>
-                  <p className="text-gray-600 mb-3" style={{ fontSize: '0.95rem', lineHeight: '1.6' }}>
+                  <h3 className="mb-2 text-white" style={{ fontSize: '1.5rem', fontWeight: '600' }}>{item.name}</h3>
+                  <p className="mb-3" style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'rgba(255, 255, 255, 0.7)' }}>
                     {item.description}
                   </p>
                   <p style={{ 
                     fontSize: '0.875rem', 
-                    color: '#6b7280',
+                    color: 'rgba(251, 191, 36, 0.8)',
                     marginBottom: '0.75rem',
                     fontWeight: '500'
                   }}>
@@ -246,7 +264,8 @@ function AppContent() {
                       borderRadius: '8px',
                       border: 'none',
                       cursor: 'pointer',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 12px rgba(251, 191, 36, 0.3)'
                     }}
                   >
                     Add to Cart

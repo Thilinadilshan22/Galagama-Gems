@@ -10,7 +10,7 @@ export function ShineText({ text }: ShineTextProps) {
       className="relative inline-block text-white mb-6 tracking-widest"
       style={{
         fontFamily: "'Playfair Display', serif",
-        fontSize: '96px',
+        fontSize: '94px',
         lineHeight: '1.2'
       }}
     >
