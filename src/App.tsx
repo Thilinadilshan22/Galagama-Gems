@@ -6,11 +6,12 @@ import { Login } from './components/Login';
 import { Signup } from './components/Signup';
 import { CustomDesign } from './components/CustomDesign';
 import { AboutUs } from './components/AboutUs';
+import { ContactUs } from './components/ContactUs';
 import { Cart } from './components/Cart';
 import { CartProvider, useCart } from './context/CartContext';
 
 function AppContent() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'custom-design' | 'about' | 'cart'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'custom-design' | 'about' | 'contact' | 'cart'>('home');
   const [isLoaded, setIsLoaded] = useState(false);
   const { scrollY } = useScroll();
   const { addToCart } = useCart();
@@ -34,6 +35,8 @@ function AppContent() {
         setCurrentPage('custom-design');
       } else if (hash === 'about') {
         setCurrentPage('about');
+      } else if (hash === 'contact') {
+        setCurrentPage('contact');
       } else if (hash === 'cart') {
         setCurrentPage('cart');
       } else {
@@ -52,6 +55,7 @@ function AppContent() {
       {currentPage === 'signup' && <Signup />}
       {currentPage === 'custom-design' && <CustomDesign />}
       {currentPage === 'about' && <AboutUs />}
+      {currentPage === 'contact' && <ContactUs />}
       {currentPage === 'cart' && <Cart />}
       {currentPage === 'home' && (
     <div className="min-h-screen">
