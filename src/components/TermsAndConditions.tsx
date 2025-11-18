@@ -361,8 +361,10 @@ export function TermsAndConditions() {
                       }}>
                         <p style={{ fontWeight: '600', marginBottom: '8px' }}>Galagama Gems</p>
                         <p>Email: support@galagamagems.com</p>
-                        <p>Phone: +1 (555) 123-4567</p>
-                        <p>Address: 123 Jewelry Lane, Gem City, GC 12345</p>
+                        <p>Phone: +94 45 2667890</p>
+                        <p>Address: Galagama Gems,
+Pabahinna,
+Sri Lanka., GC 12345</p>
                       </div>
                     </section>
 

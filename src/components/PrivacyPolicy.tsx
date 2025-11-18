@@ -353,7 +353,7 @@ export function PrivacyPolicy() {
                       }}>
                         <p style={{ fontWeight: '600', marginBottom: '8px' }}>Galagama Gems</p>
                         <p>Email: privacy@galagamagems.com</p>
-                        <p>Phone: +1 (555) 123-4567</p>
+                        <p>Phone: +94 45 2667890</p>
                       </div>
                     </section>
 

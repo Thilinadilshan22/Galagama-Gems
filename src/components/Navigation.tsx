@@ -16,7 +16,6 @@ export function Navigation({ isLoaded }: NavigationProps) {
     { label: 'Custom Design', href: '#custom-design' },
     { label: 'Packages', href: '#packages' },
     { label: 'Marketplace', href: '#marketplace' },
-    { label: 'Packages', href: '#packages' },
     { label: 'About', href: '#about' },
     { label: 'Contact', href: '#contact' }
   ];

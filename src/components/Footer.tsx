@@ -237,8 +237,8 @@ export function Footer() {
             }}>
               {[
                 { icon: '✉', text: 'info@galagamagems.com', type: 'email' },
-                { icon: '☎', text: '+1 (555) 123-4567', type: 'phone' },
-                { icon: '📍', text: '123 Jewelry Lane, Gem City', type: 'address' }
+                { icon: '☎', text: '+94 45 2667890', type: 'phone' },
+                { icon: '📍', text: 'Galagama Gems, Pabahinna, Sri Lanka.', type: 'address' }
               ].map((item, index) => (
                 <motion.li 
                   key={item.type}
