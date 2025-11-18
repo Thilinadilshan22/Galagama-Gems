@@ -5,6 +5,7 @@ import { HeroContent } from './components/HeroContent';
 import { Login } from './components/Login';
 import { Signup } from './components/Signup';
 import { CustomDesign } from './components/CustomDesign';
+import { Marketplace } from './components/Marketplace';
 import { AboutUs } from './components/AboutUs';
 import { ContactUs } from './components/ContactUs';
 import { Cart } from './components/Cart';
@@ -14,7 +15,7 @@ import { TermsAndConditions } from './components/TermsAndConditions';
 import { CartProvider, useCart } from './context/CartContext';
 
 function AppContent() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'custom-design' | 'about' | 'contact' | 'cart' | 'privacy' | 'terms'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'custom-design' | 'marketplace' | 'about' | 'contact' | 'cart' | 'privacy' | 'terms'>('home');
   const [isLoaded, setIsLoaded] = useState(false);
   const { scrollY } = useScroll();
   const { addToCart } = useCart();
@@ -36,6 +37,8 @@ function AppContent() {
         setCurrentPage('signup');
       } else if (hash === 'custom-design') {
         setCurrentPage('custom-design');
+      } else if (hash === 'marketplace') {
+        setCurrentPage('marketplace');
       } else if (hash === 'about') {
         setCurrentPage('about');
       } else if (hash === 'contact') {
@@ -61,6 +64,7 @@ function AppContent() {
       {currentPage === 'login' && <Login />}
       {currentPage === 'signup' && <Signup />}
       {currentPage === 'custom-design' && <CustomDesign />}
+      {currentPage === 'marketplace' && <Marketplace />}
       {currentPage === 'about' && <AboutUs />}
       {currentPage === 'contact' && <ContactUs />}
       {currentPage === 'cart' && <Cart />}
